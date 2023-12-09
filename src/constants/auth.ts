@@ -2,6 +2,7 @@ import * as jose from 'jose';
 import type { DefaultSession, NextAuthOptions, Session, User } from 'next-auth';
 import type { DefaultJWT, JWT } from 'next-auth/jwt';
 import GoogleProvider from 'next-auth/providers/google';
+import LineProvider from 'next-auth/providers/line';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
@@ -36,6 +37,13 @@ export const options: NextAuthOptions = {
     GoogleProvider({
       clientId: String(process.env.GOOGLE_CLIENT_ID),
       clientSecret: String(process.env.GOOGLE_CLIENT_SECRET),
+    }),
+    LineProvider({
+      clientId: String(process.env.LINE_CLIENT_ID),
+      clientSecret: String(process.env.LINE_CLIENT_SECRET),
+      authorization: {
+        params: { scope: 'openid profile email' },
+      },
     }),
   ],
   callbacks: {
