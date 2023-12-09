@@ -1,4 +1,8 @@
-import { GoogleLoginButton, UserProfile } from '@/app/_components';
+import {
+  GoogleLoginButton,
+  LogoutButton,
+  UserProfile,
+} from '@/app/_components';
 import type { Session } from 'next-auth';
 import { headers } from 'next/headers';
 import type { JSX } from 'react';
@@ -48,9 +52,7 @@ export default async function Home(): Promise<JSX.Element> {
             email={session.user.email ?? ''}
             avatarUrl={session.user.image}
           />
-          <span className='isolate inline-flex rounded-md shadow-sm'>
-            <GoogleLoginButton buttonText='Googleアカウントを連携' />
-          </span>
+          <LogoutButton />
         </>
       ) : (
         <span className='isolate inline-flex rounded-md shadow-sm'>
