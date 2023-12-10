@@ -1,3 +1,5 @@
+import { db } from '@/db';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import * as jose from 'jose';
 import type { DefaultSession, NextAuthOptions, Session, User } from 'next-auth';
 import type { DefaultJWT, JWT } from 'next-auth/jwt';
@@ -33,6 +35,10 @@ const isOidcProvider = (value: unknown): value is OidcProvider => {
 
 export const options: NextAuthOptions = {
   debug: true,
+  adapter: DrizzleAdapter(db),
+  session: {
+    strategy: 'jwt',
+  },
   providers: [
     GoogleProvider({
       clientId: String(process.env.GOOGLE_CLIENT_ID),
@@ -46,6 +52,10 @@ export const options: NextAuthOptions = {
       },
     }),
   ],
+  // 必要に応じて https://next-auth.js.org/configuration/pages を参考に各ページをオーバーライドする
+  pages: {
+    signIn: '/login',
+  },
   callbacks: {
     session: async ({
       session,
@@ -55,7 +65,7 @@ export const options: NextAuthOptions = {
       user: User;
       token: JWT;
     }) => {
-      if (token.sub != null && token.provider != null) {
+      if (token != null && token.sub != null && token.provider != null) {
         const payload = {
           sub: token.sub,
           provider: String(token.provider),
