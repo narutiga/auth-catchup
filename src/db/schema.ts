@@ -1,4 +1,5 @@
 import type { AdapterAccount } from '@auth/core/adapters';
+import { sql } from 'drizzle-orm';
 import {
   index,
   int,
@@ -15,6 +16,12 @@ export const users = mysqlTable('user', {
   email: varchar('email', { length: 255 }).notNull().unique('ui_user_01'),
   emailVerified: timestamp('emailVerified').defaultNow(),
   image: varchar('image', { length: 255 }),
+  created_at: timestamp('created_at', { mode: 'date', fsp: 6 })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp('updated_at', { mode: 'date', fsp: 6 })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)`),
 });
 
 export const accounts = mysqlTable(
@@ -33,6 +40,12 @@ export const accounts = mysqlTable(
     scope: varchar('scope', { length: 255 }),
     id_token: text('id_token'),
     session_state: varchar('session_state', { length: 255 }),
+    created_at: timestamp('created_at', { mode: 'date', fsp: 6 })
+      .notNull()
+      .defaultNow(),
+    updated_at: timestamp('updated_at', { mode: 'date', fsp: 6 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)`),
   },
   (account) => ({
     compoundKey: primaryKey(account.provider, account.providerAccountId),
@@ -48,6 +61,12 @@ export const sessions = mysqlTable(
       .primaryKey(),
     userId: varchar('userId', { length: 255 }).notNull(),
     expires: timestamp('expires', { mode: 'date' }).notNull(),
+    created_at: timestamp('created_at', { mode: 'date', fsp: 6 })
+      .notNull()
+      .defaultNow(),
+    updated_at: timestamp('updated_at', { mode: 'date', fsp: 6 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)`),
   },
   (session) => ({
     userIdIndex: index('idx_session_01').on(session.userId),
