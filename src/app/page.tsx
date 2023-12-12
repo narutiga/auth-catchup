@@ -1,4 +1,5 @@
 import {
+  AccountLinkingSection,
   GoogleLoginButton,
   LineLoginButton,
   LogoutButton,
@@ -53,6 +54,7 @@ export default async function Home(): Promise<JSX.Element> {
             email={session.user.email ?? ''}
             avatarUrl={session.user.image}
           />
+          <AccountLinkingSection />
           <LogoutButton />
         </>
       ) : (
