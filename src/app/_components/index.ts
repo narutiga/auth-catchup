@@ -1,3 +1,4 @@
+export { AccountLinkingSection } from './AccountLinkingSection';
 export { GoogleLoginButton } from './GoogleLoginButton';
 export { LineLoginButton } from './LineLoginButton';
 export { LogoutButton } from './LogoutButton';
