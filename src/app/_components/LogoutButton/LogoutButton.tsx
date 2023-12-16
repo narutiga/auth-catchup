@@ -12,7 +12,7 @@ const handleLogout = async (event: MouseEvent<HTMLButtonElement>) => {
 export const LogoutButton = (): JSX.Element => {
   return (
     <button
-      className='rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'
+      className='rounded bg-orange-400 px-4 py-2 font-bold text-white hover:bg-orange-500'
       onClick={handleLogout}
     >
       ログアウト
