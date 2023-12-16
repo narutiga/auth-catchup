@@ -1,38 +1,42 @@
 'use client';
-
-import { Switch } from '@/components/ui/switch';
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { ConfirmDialog } from '@/app/_components/ConfirmDialog/ConfirmDialog';
+import { Switch } from '@/components/ui/switch';
 
-interface LinkState {
-  isGoogleLinked: boolean;
-  isLineLinked: boolean;
-}
+type Provider = 'google' | 'line';
 
-const initialLinkState: LinkState = {
-  isGoogleLinked: true,
-  isLineLinked: false,
+type Props = {
+  accounts: Provider[];
 };
 
-export const AccountLinkingSection = (): JSX.Element => {
-  const [linkState, setLinkState] = useState<LinkState>(initialLinkState);
-  const onGoogleAccountLink = async () => {
-    if (linkState.isGoogleLinked) {
-      setLinkState({ ...linkState, isGoogleLinked: false });
+export const AccountLinkingSection = ({ accounts }: Props): JSX.Element => {
+  const [isGoogleAccount, setIsGoogleAccount] = useState<boolean>(
+    accounts.includes('google')
+  );
+  const [isLineAccount, setIsLineAccount] = useState<boolean>(
+    accounts.includes('line')
+  );
+  const [isGoogleDialogOpen, setIsGoogleDialogOpen] = useState(false);
+  const [isLineDialogOpen, setIsLineDialogOpen] = useState(false);
+
+  const toggleGoogleAccount = async () => {
+    if (isGoogleAccount) {
+      setIsGoogleDialogOpen(true);
     }
-    if (!linkState.isGoogleLinked) {
-      // await signIn('google');
-      setLinkState({ ...linkState, isGoogleLinked: true });
+    if (!isGoogleAccount) {
+      await signIn('google');
+      setIsGoogleAccount(true);
     }
   };
 
-  const onLineAccountLink = async () => {
-    if (linkState.isLineLinked) {
-      setLinkState({ ...linkState, isLineLinked: false });
+  const toggleLineAccount = async () => {
+    if (isLineAccount) {
+      setIsLineDialogOpen(true);
     }
-    if (!linkState.isLineLinked) {
-      // await signIn('line');
-      setLinkState({ ...linkState, isLineLinked: true });
+    if (!isLineAccount) {
+      await signIn('line');
+      setIsLineAccount(true);
     }
   };
 
@@ -45,19 +49,33 @@ export const AccountLinkingSection = (): JSX.Element => {
       <div className='px-5 py-6 border-2 border-slate-200 rounded-lg'>
         <div className='flex mb-6'>
           <Switch
-            checked={linkState.isGoogleLinked}
-            onClick={onGoogleAccountLink}
-            disabled={!linkState.isLineLinked}
+            checked={isGoogleAccount}
+            disabled={!isLineAccount}
+            onClick={toggleGoogleAccount}
           />
           <label className='ml-4'>Googleアカウントを連携</label>
+          <ConfirmDialog
+            title='Googleアカウント連携を解除しますか'
+            provider='google'
+            isOpen={isGoogleDialogOpen}
+            onClose={() => setIsGoogleDialogOpen(false)}
+            onToggle={() => setIsGoogleAccount(false)}
+          />
         </div>
         <div className='flex'>
           <Switch
-            checked={linkState.isLineLinked}
-            onClick={onLineAccountLink}
-            disabled={!linkState.isGoogleLinked}
+            checked={isLineAccount}
+            disabled={!isGoogleAccount}
+            onClick={toggleLineAccount}
           />
           <label className='ml-4'>LINEアカウントを連携</label>
+          <ConfirmDialog
+            title='LINEアカウント連携を解除しますか'
+            provider='line'
+            isOpen={isLineDialogOpen}
+            onClose={() => setIsLineDialogOpen(false)}
+            onToggle={() => setIsLineAccount(false)}
+          />
         </div>
       </div>
     </div>
