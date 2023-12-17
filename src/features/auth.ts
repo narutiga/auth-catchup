@@ -43,6 +43,7 @@ export const options: NextAuthOptions = {
     GoogleProvider({
       clientId: String(process.env.GOOGLE_CLIENT_ID),
       clientSecret: String(process.env.GOOGLE_CLIENT_SECRET),
+      allowDangerousEmailAccountLinking: true,
     }),
     LineProvider({
       clientId: String(process.env.LINE_CLIENT_ID),
@@ -50,6 +51,7 @@ export const options: NextAuthOptions = {
       authorization: {
         params: { scope: 'openid profile email' },
       },
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   // 必要に応じて https://next-auth.js.org/configuration/pages を参考に各ページをオーバーライドする
