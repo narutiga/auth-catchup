@@ -46,8 +46,8 @@ export const ConfirmDialog = ({
           <Button
             type='submit'
             className='flex gap-2'
-            onClick={() => {
-              deleteAccount(provider);
+            onClick={async () => {
+              await deleteAccount(provider);
               onClose();
               onToggle();
             }}

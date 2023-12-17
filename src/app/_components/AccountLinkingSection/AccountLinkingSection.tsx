@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { ConfirmDialog } from '@/app/_components/ConfirmDialog/ConfirmDialog';
 import { Switch } from '@/components/ui/switch';
+import { action } from '@/app/actions';
 
 export type Provider = 'google' | 'line';
 
@@ -26,7 +27,7 @@ export const AccountLinkingSection = ({ accounts }: Props): JSX.Element => {
     }
     if (!isGoogleAccount) {
       await signIn('google');
-      setIsGoogleAccount(true);
+      action();
     }
   };
 
@@ -36,7 +37,7 @@ export const AccountLinkingSection = ({ accounts }: Props): JSX.Element => {
     }
     if (!isLineAccount) {
       await signIn('line');
-      setIsLineAccount(true);
+      action();
     }
   };
 
