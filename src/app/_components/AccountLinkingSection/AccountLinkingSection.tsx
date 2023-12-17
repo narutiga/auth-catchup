@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react';
 import { ConfirmDialog } from '@/app/_components/ConfirmDialog/ConfirmDialog';
 import { Switch } from '@/components/ui/switch';
 
-type Provider = 'google' | 'line';
+export type Provider = 'google' | 'line';
 
 type Props = {
   accounts: Provider[];

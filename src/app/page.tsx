@@ -5,9 +5,14 @@ import {
   LogoutButton,
   UserProfile,
 } from '@/app/_components';
+import { Provider } from '@/app/_components/AccountLinkingSection/AccountLinkingSection';
 import type { Session } from 'next-auth';
 import { headers } from 'next/headers';
 import type { JSX } from 'react';
+
+type ProviderObject = {
+  provider: Provider;
+};
 
 async function fetchSession(cookie: string): Promise<Session | null> {
   const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/session`, {
@@ -15,10 +20,20 @@ async function fetchSession(cookie: string): Promise<Session | null> {
       cookie,
     },
   });
-
   const session = (await response.json()) as Session;
-
   return Object.keys(session).length > 0 ? session : null;
+}
+
+async function fetchAccountProviders(
+  cookie: string
+): Promise<ProviderObject[]> {
+  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/account`, {
+    method: 'GET',
+    headers: { cookie },
+    next: { tags: ['account'] },
+  });
+  if (!res.ok) return [];
+  return res.json();
 }
 
 type ValidSession = {
@@ -44,6 +59,8 @@ function isValidSession(session: Session | null): session is ValidSession {
 
 export default async function Home(): Promise<JSX.Element> {
   const session = await fetchSession(headers().get('cookie') ?? '');
+  const res = await fetchAccountProviders(headers().get('cookie') ?? '');
+  const providers = res.map((x) => x.provider);
 
   return (
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
@@ -54,7 +71,7 @@ export default async function Home(): Promise<JSX.Element> {
             email={session.user.email ?? ''}
             avatarUrl={session.user.image}
           />
-          <AccountLinkingSection />
+          <AccountLinkingSection accounts={providers} />
           <LogoutButton />
         </>
       ) : (
