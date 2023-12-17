@@ -1,45 +1,37 @@
-'use client';
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { ConfirmDialog } from '@/app/_components/ConfirmDialog/ConfirmDialog';
-import { Switch } from '@/components/ui/switch';
-import { action } from '@/app/actions';
+import { headers } from 'next/headers';
+import { AccountLinkingToggle } from '@/app/_components/AccountLinkingSection/AccountLinkingToggle';
 
-export type Provider = 'google' | 'line';
+export type AccountProvider = 'google' | 'line';
 
-type Props = {
-  accounts: Provider[];
+type ProviderObject = {
+  provider: AccountProvider;
 };
 
-export const AccountLinkingSection = ({ accounts }: Props): JSX.Element => {
-  const [isGoogleAccount, setIsGoogleAccount] = useState<boolean>(
-    accounts.includes('google')
-  );
-  const [isLineAccount, setIsLineAccount] = useState<boolean>(
-    accounts.includes('line')
-  );
-  const [isGoogleDialogOpen, setIsGoogleDialogOpen] = useState(false);
-  const [isLineDialogOpen, setIsLineDialogOpen] = useState(false);
+const Accounts: AccountProvider[] = ['google', 'line'];
 
-  const toggleGoogleAccount = async () => {
-    if (isGoogleAccount) {
-      setIsGoogleDialogOpen(true);
-    }
-    if (!isGoogleAccount) {
-      await signIn('google');
-      action();
-    }
-  };
+const checkSwitchDisabled = (
+  provider: AccountProvider,
+  accounts: AccountProvider[]
+): boolean => {
+  if (accounts.includes(provider) && accounts.length === 1) return true;
+  return false;
+};
 
-  const toggleLineAccount = async () => {
-    if (isLineAccount) {
-      setIsLineDialogOpen(true);
-    }
-    if (!isLineAccount) {
-      await signIn('line');
-      action();
-    }
-  };
+async function fetchAccountProviders(
+  cookie: string
+): Promise<ProviderObject[]> {
+  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/account`, {
+    method: 'GET',
+    headers: { cookie },
+    next: { tags: ['account'] },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export const AccountLinkingSection = async (): Promise<JSX.Element> => {
+  const res = await fetchAccountProviders(headers().get('cookie') ?? '');
+  const accounts = res.map((x) => x.provider);
 
   return (
     <div className='w-80 mb-8'>
@@ -47,37 +39,15 @@ export const AccountLinkingSection = ({ accounts }: Props): JSX.Element => {
       <p className='mb-4 text-sm text-slate-600'>
         いずれかひとつの認証が必要です。アカウント削除する場合は運営にお問い合わせください。
       </p>
-      <div className='px-5 py-6 border-2 border-slate-200 rounded-lg'>
-        <div className='flex mb-6'>
-          <Switch
-            checked={isGoogleAccount}
-            disabled={!isLineAccount}
-            onClick={toggleGoogleAccount}
+      <div className='px-5 pt-6 border-2 border-slate-200 rounded-lg'>
+        {Accounts.map((account) => (
+          <AccountLinkingToggle
+            key={account}
+            provider={account}
+            isToggleOn={accounts.includes(account)}
+            isDisabled={checkSwitchDisabled(account, accounts)}
           />
-          <label className='ml-4'>Googleアカウントを連携</label>
-          <ConfirmDialog
-            title='Googleアカウント連携を解除しますか'
-            provider='google'
-            isOpen={isGoogleDialogOpen}
-            onClose={() => setIsGoogleDialogOpen(false)}
-            onToggle={() => setIsGoogleAccount(false)}
-          />
-        </div>
-        <div className='flex'>
-          <Switch
-            checked={isLineAccount}
-            disabled={!isGoogleAccount}
-            onClick={toggleLineAccount}
-          />
-          <label className='ml-4'>LINEアカウントを連携</label>
-          <ConfirmDialog
-            title='LINEアカウント連携を解除しますか'
-            provider='line'
-            isOpen={isLineDialogOpen}
-            onClose={() => setIsLineDialogOpen(false)}
-            onToggle={() => setIsLineAccount(false)}
-          />
-        </div>
+        ))}
       </div>
     </div>
   );

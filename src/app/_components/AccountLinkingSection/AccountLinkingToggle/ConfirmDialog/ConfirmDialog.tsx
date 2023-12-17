@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Dialog,
   DialogClose,
@@ -7,16 +9,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { AccountProvider } from '@/app/_components/AccountLinkingSection/AccountLinkingSection';
+import { useState } from 'react';
 
 type Props = {
   title: string;
-  provider: string;
+  provider: AccountProvider;
   isOpen: boolean;
   onClose: () => void;
-  onToggle: () => void;
+  onClick: () => void;
 };
 
-async function deleteAccount(provider: string) {
+async function deleteAccount(provider: AccountProvider) {
   await fetch('api/account', {
     method: 'DELETE',
     body: JSON.stringify({ provider }),
@@ -28,9 +32,10 @@ export const ConfirmDialog = ({
   provider,
   isOpen,
   onClose,
-  onToggle,
+  onClick,
 }: Props): JSX.Element => {
-  // TODO: 送信中はボタンをdisabledにする
+  const [isLoading, setIsLoading] = useState(false);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='top-[0] translate-y-[0] sm:top-[50%] sm:max-w-[350px] sm:translate-y-[-50%]'>
@@ -39,17 +44,19 @@ export const ConfirmDialog = ({
         </DialogHeader>
         <DialogFooter className='mt-4 gap-x-0.5 gap-y-2'>
           <DialogClose asChild>
-            <Button type='button' variant='outline'>
+            <Button type='button' variant='outline' disabled={isLoading}>
               キャンセル
             </Button>
           </DialogClose>
           <Button
-            type='submit'
-            className='flex gap-2'
+            type='button'
+            disabled={isLoading}
             onClick={async () => {
+              setIsLoading(true);
               await deleteAccount(provider);
               onClose();
-              onToggle();
+              onClick();
+              setIsLoading(false);
             }}
           >
             <span>解除する</span>
