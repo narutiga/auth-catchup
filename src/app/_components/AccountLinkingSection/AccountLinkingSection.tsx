@@ -9,14 +9,6 @@ type ProviderObject = {
 
 const Accounts: AccountProvider[] = ['google', 'line'];
 
-const checkSwitchDisabled = (
-  provider: AccountProvider,
-  accounts: AccountProvider[]
-): boolean => {
-  if (accounts.includes(provider) && accounts.length === 1) return true;
-  return false;
-};
-
 async function fetchAccountProviders(
   cookie: string
 ): Promise<ProviderObject[]> {
@@ -28,6 +20,14 @@ async function fetchAccountProviders(
   if (!res.ok) return [];
   return res.json();
 }
+
+const checkSwitchDisabled = (
+  provider: AccountProvider,
+  accounts: AccountProvider[]
+): boolean => {
+  if (accounts.includes(provider) && accounts.length === 1) return true;
+  return false;
+};
 
 export const AccountLinkingSection = async (): Promise<JSX.Element> => {
   const res = await fetchAccountProviders(headers().get('cookie') ?? '');

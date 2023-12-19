@@ -1,11 +1,11 @@
 'use client';
 
+import { useState, type JSX, MouseEvent } from 'react';
+import { signIn } from 'next-auth/react';
+import { getAccountAction } from '@/app/actions';
+import { Switch } from '@/components/ui/switch';
 import { AccountProvider } from '@/app/_components/AccountLinkingSection/AccountLinkingSection';
 import { ConfirmDialog } from '@/app/_components/AccountLinkingSection/AccountLinkingToggle/ConfirmDialog';
-import { action } from '@/app/actions';
-import { Switch } from '@/components/ui/switch';
-import { signIn } from 'next-auth/react';
-import { useState, type JSX } from 'react';
 
 type Props = {
   provider: AccountProvider;
@@ -19,8 +19,6 @@ const getProviderName = (provider: AccountProvider): string => {
       return 'Google';
     case 'line':
       return 'LINE';
-    default:
-      return '';
   }
 };
 
@@ -32,30 +30,36 @@ export const AccountLinkingToggle = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const providerName = getProviderName(provider);
 
-  const toggleSwitch = async () => {
+  const onToggle = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     if (isToggleOn) {
       setIsDialogOpen(true);
     }
     if (!isToggleOn) {
       await signIn(provider);
-      action();
+      getAccountAction();
     }
   };
 
   return (
     <div className='flex mb-6'>
       <Switch
+        id={provider}
+        name={provider}
         checked={isToggleOn}
         disabled={isDisabled}
-        onClick={toggleSwitch}
+        onClick={onToggle}
       />
-      <label className='ml-4'>{`${providerName}アカウントを連携`}</label>
+      <label
+        htmlFor={provider}
+        className='ml-4'
+      >{`${providerName}アカウントを連携`}</label>
       <ConfirmDialog
         title={`${providerName}アカウント連携を解除しますか`}
         provider={provider}
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onClick={action}
+        onFetchAccount={getAccountAction}
       />
     </div>
   );
