@@ -17,7 +17,7 @@ type Props = {
   provider: AccountProvider;
   isOpen: boolean;
   onClose: () => void;
-  onClick: () => void;
+  onFetchAccount: () => void;
 };
 
 async function deleteAccount(provider: AccountProvider) {
@@ -32,7 +32,7 @@ export const ConfirmDialog = ({
   provider,
   isOpen,
   onClose,
-  onClick,
+  onFetchAccount,
 }: Props): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,7 +55,7 @@ export const ConfirmDialog = ({
               setIsLoading(true);
               await deleteAccount(provider);
               onClose();
-              onClick();
+              onFetchAccount();
               setIsLoading(false);
             }}
           >

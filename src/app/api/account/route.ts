@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { eq, sql } from 'drizzle-orm';
 import * as jose from 'jose';
@@ -6,18 +6,13 @@ import { db } from '@/db';
 import { accounts } from '@/db/schema';
 import { options } from '@/features/auth';
 
-export const dynamic = 'force-dynamic';
-// defaults to auto
-
 export async function GET(req: Request) {
   const session = await getServerSession(options);
-
   const jwt = session?.appAccessToken || '';
   const secret = new TextEncoder().encode(
     process.env.APP_ACCESS_TOKEN_SECRET || ''
   );
   const { payload } = await jose.jwtVerify(jwt, secret);
-
   const userId = payload.sub || '';
 
   try {
@@ -37,18 +32,16 @@ export async function GET(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   const reqJson = await req.json();
   const { provider } = reqJson;
 
   const session = await getServerSession(options);
-
   const jwt = session?.appAccessToken || '';
   const secret = new TextEncoder().encode(
     process.env.APP_ACCESS_TOKEN_SECRET || ''
   );
   const { payload } = await jose.jwtVerify(jwt, secret);
-
   const userId = payload.sub;
 
   const existingAccount = await db
@@ -68,6 +61,9 @@ export async function DELETE(req: Request) {
       .where(
         eq(accounts.providerAccountId, existingAccount[0].providerAccountId)
       );
+    return new NextResponse(null, {
+      status: 200,
+    });
   } catch (e) {
     console.log(e);
     return NextResponse.json(
@@ -75,8 +71,4 @@ export async function DELETE(req: Request) {
       { status: 400 }
     );
   }
-
-  return new Response(null, {
-    status: 200,
-  });
 }
