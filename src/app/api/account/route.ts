@@ -6,14 +6,14 @@ import { db } from '@/db';
 import { accounts } from '@/db/schema';
 import { options } from '@/features/auth';
 
-export async function GET(req: Request) {
+export async function GET() {
   const session = await getServerSession(options);
-  const jwt = session?.appAccessToken || '';
   const secret = new TextEncoder().encode(
-    process.env.APP_ACCESS_TOKEN_SECRET || ''
+    String(process.env.APP_ACCESS_TOKEN_SECRET)
   );
+  const jwt = String(session?.appAccessToken);
   const { payload } = await jose.jwtVerify(jwt, secret);
-  const userId = payload.sub || '';
+  const userId = String(payload.sub);
 
   try {
     const res = await db
