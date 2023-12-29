@@ -9,15 +9,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AccountProvider } from '@/app/_components/AccountLinkingSection/AccountLinkingSection';
 import { useState } from 'react';
+import { getAccountAction } from '@/app/actions';
+import { AccountProvider } from '@/lib/fetchAccountProviders';
 
 type Props = {
   title: string;
   provider: AccountProvider;
   isOpen: boolean;
   onClose: () => void;
-  onFetchAccount: () => void;
 };
 
 async function deleteAccount(provider: AccountProvider) {
@@ -32,7 +32,6 @@ export const ConfirmDialog = ({
   provider,
   isOpen,
   onClose,
-  onFetchAccount,
 }: Props): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,8 +53,8 @@ export const ConfirmDialog = ({
             onClick={async () => {
               setIsLoading(true);
               await deleteAccount(provider);
+              getAccountAction();
               onClose();
-              onFetchAccount();
               setIsLoading(false);
             }}
           >

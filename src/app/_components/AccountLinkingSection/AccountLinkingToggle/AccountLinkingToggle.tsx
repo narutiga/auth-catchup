@@ -2,10 +2,9 @@
 
 import { useState, type JSX, MouseEvent } from 'react';
 import { signIn } from 'next-auth/react';
-import { getAccountAction } from '@/app/actions';
 import { Switch } from '@/components/ui/switch';
-import { AccountProvider } from '@/app/_components/AccountLinkingSection/AccountLinkingSection';
 import { ConfirmDialog } from '@/app/_components/AccountLinkingSection/AccountLinkingToggle/ConfirmDialog';
+import { AccountProvider } from '@/lib/fetchAccountProviders';
 
 type Props = {
   provider: AccountProvider;
@@ -37,7 +36,6 @@ export const AccountLinkingToggle = ({
     }
     if (!isToggleOn) {
       await signIn(provider);
-      getAccountAction();
     }
   };
 
@@ -59,7 +57,6 @@ export const AccountLinkingToggle = ({
         provider={provider}
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onFetchAccount={getAccountAction}
       />
     </div>
   );
