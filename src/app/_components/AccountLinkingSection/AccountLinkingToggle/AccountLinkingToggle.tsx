@@ -28,6 +28,7 @@ export const AccountLinkingToggle = ({
   isDisabled,
 }: Props): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const providerName = getProviderName(provider);
 
   const onToggle = async (event: MouseEvent<HTMLButtonElement>) => {
@@ -36,10 +37,13 @@ export const AccountLinkingToggle = ({
       setIsDialogOpen(true);
     }
     if (!isToggleOn) {
+      setIsLoading(true);
       try {
         await signIn(provider);
       } catch (error) {
         Toast.error({ message: 'アカウントの連携に失敗しました' });
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -50,7 +54,7 @@ export const AccountLinkingToggle = ({
         id={provider}
         name={provider}
         checked={isToggleOn}
-        disabled={isDisabled}
+        disabled={isDisabled || isLoading}
         onClick={onToggle}
       />
       <label
