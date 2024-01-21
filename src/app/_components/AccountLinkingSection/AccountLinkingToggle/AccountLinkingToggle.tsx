@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/app/_components/AccountLinkingSection/AccountLinkingToggle/ConfirmDialog';
 import { AccountProvider } from '@/lib/fetchAccountProviders';
+import { Toast } from '@/components/toast/Toast';
 
 type Props = {
   provider: AccountProvider;
@@ -35,7 +36,11 @@ export const AccountLinkingToggle = ({
       setIsDialogOpen(true);
     }
     if (!isToggleOn) {
-      await signIn(provider);
+      try {
+        await signIn(provider);
+      } catch (error) {
+        Toast.error({ message: 'アカウントの連携に失敗しました' });
+      }
     }
   };
 

@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Dialog,
   DialogClose,
@@ -12,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { getAccountAction } from '@/app/actions';
 import { AccountProvider } from '@/lib/fetchAccountProviders';
+import { Toast } from '@/components/toast/Toast';
 
 type Props = {
   title: string;
@@ -20,12 +19,15 @@ type Props = {
   onClose: () => void;
 };
 
-async function deleteAccount(provider: AccountProvider) {
-  await fetch('api/account', {
+const unlinkAccount = async (provider: AccountProvider) => {
+  const res = await fetch('api/account', {
     method: 'DELETE',
     body: JSON.stringify({ provider }),
   });
-}
+  if (!res.ok) {
+    Toast.error({ message: 'アカウントの解除に失敗しました' });
+  }
+};
 
 export const ConfirmDialog = ({
   title,
@@ -52,8 +54,8 @@ export const ConfirmDialog = ({
             disabled={isLoading}
             onClick={async () => {
               setIsLoading(true);
-              await deleteAccount(provider);
-              getAccountAction();
+              await unlinkAccount(provider);
+              await getAccountAction();
               onClose();
               setIsLoading(false);
             }}
