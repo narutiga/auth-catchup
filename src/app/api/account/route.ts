@@ -6,63 +6,43 @@ import { db } from '@/db';
 import { accounts } from '@/db/schema';
 import { options } from '@/features/auth';
 
-export async function GET() {
-  const session = await getServerSession(options);
-  const secret = new TextEncoder().encode(
-    String(process.env.APP_ACCESS_TOKEN_SECRET)
-  );
-  const jwt = String(session?.appAccessToken);
-  const { payload } = await jose.jwtVerify(jwt, secret);
-  const userId = String(payload.sub);
-
-  try {
-    const res = await db
-      .select({
-        provider: accounts.provider,
-      })
-      .from(accounts)
-      .where(eq(accounts.userId, userId));
-    return NextResponse.json(res, { status: 200 });
-  } catch (e) {
-    console.log(e);
-    return NextResponse.json(
-      { error: 'UNEXPECTED_ERROR_HAS_OCCURRED' },
-      { status: 400 }
-    );
-  }
-}
-
 export async function DELETE(req: NextRequest) {
   const reqJson = await req.json();
   const { provider } = reqJson;
 
   const session = await getServerSession(options);
-  const jwt = session?.appAccessToken || '';
+  const jwt = String(session?.appAccessToken);
   const secret = new TextEncoder().encode(
-    process.env.APP_ACCESS_TOKEN_SECRET || ''
+    String(process.env.APP_ACCESS_TOKEN_SECRET)
   );
   const { payload } = await jose.jwtVerify(jwt, secret);
-  const userId = payload.sub;
+  const userId = String(payload.sub);
 
-  const existingAccount = await db
+  const existingAccounts = await db
     .select()
     .from(accounts)
-    .where(
-      sql`${accounts.userId} = ${userId} and ${accounts.provider} = ${provider}`
-    );
+    .where(eq(accounts.userId, userId));
 
-  if (existingAccount.length === 0) {
+  if (existingAccounts.length === 1) {
+    return new Response(null, {
+      status: 204,
+    });
+  }
+
+  const targetAccount = existingAccounts.find(
+    (account) => account.provider === provider
+  );
+
+  if (targetAccount === undefined) {
     return NextResponse.json({ error: 'NOT FOUND' }, { status: 404 });
   }
 
   try {
     await db
       .delete(accounts)
-      .where(
-        eq(accounts.providerAccountId, existingAccount[0].providerAccountId)
-      );
-    return new NextResponse(null, {
-      status: 200,
+      .where(eq(accounts.providerAccountId, targetAccount.providerAccountId));
+    return new Response(null, {
+      status: 204,
     });
   } catch (e) {
     console.log(e);
